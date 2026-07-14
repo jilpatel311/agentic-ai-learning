@@ -1,0 +1,27 @@
+from groq import Groq
+
+from app.config.settings import settings
+
+
+client = Groq(
+    api_key=settings.GROQ_API_KEY
+)
+
+
+class GroqService:
+
+    def chat(self, prompt: str):
+
+        response = client.chat.completions.create(
+
+            model=settings.GROQ_MODEL,
+
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return response.choices[0].message.content
