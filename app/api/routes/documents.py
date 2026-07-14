@@ -1,23 +1,22 @@
-from fastapi import APIRouter
-from fastapi import UploadFile
-from fastapi import File
+from fastapi import APIRouter, UploadFile, File
 
 from app.services.document_service import DocumentService
 
-
 router = APIRouter(
     prefix="/documents",
-    tags=["Documents"]
+    tags=["Documents"],
 )
 
-service = DocumentService()
+document_service = DocumentService()
 
 
 @router.post("/upload")
-def upload_document(
-    file: UploadFile = File(...)
+async def upload_document(
+    file: UploadFile = File(..., description="PDF file to upload")
 ):
-
-    return service.upload_document(
-        file
-    )
+    """
+    Upload a PDF document for processing.
+    
+    - **file**: The PDF file to upload
+    """
+    return document_service.upload_document(file)
