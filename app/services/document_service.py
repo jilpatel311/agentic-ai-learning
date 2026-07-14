@@ -10,8 +10,9 @@ from app.constants.file_constants import (
     MAX_FILE_SIZE,
 )
 
-from app.services.chunking_service import ChunkingService
-from app.utils.pdf_parser import PDFParser
+from app.services.document_ingestion_service import (
+    DocumentIngestionService,
+)
 
 UPLOAD_DIR = "uploads"
 
@@ -19,16 +20,18 @@ UPLOAD_DIR = "uploads"
 class DocumentService:
 
     def __init__(self):
-        self.chunking_service = ChunkingService()
+        self.document_ingestion_service = DocumentIngestionService()
 
     def upload_document(self, file: UploadFile):
 
-        if file.filename is None:
+        # Validate filename
+        if not file.filename:
             raise HTTPException(
                 status_code=400,
                 detail="Filename is missing."
             )
 
+        # Validate extension
         extension = Path(file.filename).suffix.lower()
 
         if extension not in ALLOWED_EXTENSIONS:
@@ -37,6 +40,7 @@ class DocumentService:
                 detail="Only PDF, DOCX and TXT files are allowed."
             )
 
+        # Validate file size
         file.file.seek(0, os.SEEK_END)
         file_size = file.file.tell()
         file.file.seek(0)
@@ -47,6 +51,7 @@ class DocumentService:
                 detail="File size should not exceed 5 MB."
             )
 
+        # Create uploads directory if needed
         os.makedirs(
             UPLOAD_DIR,
             exist_ok=True
@@ -57,18 +62,20 @@ class DocumentService:
             file.filename
         )
 
+        # Save uploaded file
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            shutil.copyfileobj(
+                file.file,
+                buffer
+            )
 
-        extracted_text = ""
-
-        if extension == ".pdf":
-            extracted_text = PDFParser.extract_text(file_path)
-
-        chunks = self.chunking_service.split_text(extracted_text)
+        # Start AI ingestion pipeline
+        result = self.document_ingestion_service.ingest_document(
+            file_path=file_path,
+            filename=file.filename
+        )
 
         return {
-            "filename": file.filename,
-            "total_chunks": len(chunks),
-            "chunks": chunks
+            "message": "Document processed successfully.",
+            **result
         }
