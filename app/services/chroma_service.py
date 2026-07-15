@@ -5,8 +5,9 @@ class ChromaService:
 
     def __init__(self):
         """
-        Initialize a persistent ChromaDB client.
+        Initialize ChromaDB client and collection.
         """
+
         self.client = chromadb.PersistentClient(
             path="./chroma_db"
         )
@@ -23,7 +24,7 @@ class ChromaService:
         metadatas: list[dict],
     ) -> None:
         """
-        Store document chunks and embeddings.
+        Store document chunks in ChromaDB.
         """
 
         self.collection.add(
@@ -33,23 +34,24 @@ class ChromaService:
             metadatas=metadatas,
         )
 
-    def get_all_documents(self):
-        """
-        Fetch every stored record.
-        """
-
-        return self.collection.get()
-
     def similarity_search(
         self,
-        embedding: list[float],
+        query_embedding: list[float],
         top_k: int = 3,
     ):
         """
-        Search the nearest vectors.
+        Retrieve the most similar document chunks.
         """
 
         return self.collection.query(
-            query_embeddings=[embedding],
+            query_embeddings=[query_embedding],
             n_results=top_k,
         )
+
+    def get_all_documents(self):
+        """
+        Return all stored records.
+        Useful for debugging.
+        """
+
+        return self.collection.get()

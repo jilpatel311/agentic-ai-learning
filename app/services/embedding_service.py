@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 
 class EmbeddingService:
     """
-    Generates vector embeddings for document chunks.
+    Generates embeddings for documents and user queries.
     """
 
     def __init__(self):
@@ -13,14 +13,30 @@ class EmbeddingService:
 
     def generate_embeddings(
         self,
-        chunks: list[str]
+        chunks: list[str],
     ) -> list[list[float]]:
         """
-        Convert text chunks into vector embeddings.
+        Generate embeddings for multiple document chunks.
         """
+
         embeddings = self.model.encode(
             chunks,
-            convert_to_numpy=True
+            convert_to_numpy=True,
         )
 
         return embeddings.tolist()
+
+    def generate_query_embedding(
+        self,
+        query: str,
+    ) -> list[float]:
+        """
+        Generate embedding for a user's question.
+        """
+
+        embedding = self.model.encode(
+            query,
+            convert_to_numpy=True,
+        )
+
+        return embedding.tolist()
