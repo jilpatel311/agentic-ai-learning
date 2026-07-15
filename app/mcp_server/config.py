@@ -1,0 +1,1 @@
+SERVER_NAME = "AI Employee Assistant MCP Server"
