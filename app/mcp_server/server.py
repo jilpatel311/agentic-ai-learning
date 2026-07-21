@@ -1,12 +1,12 @@
 from mcp.server.fastmcp import FastMCP
 
 from app.mcp_server.config import SERVER_NAME
+from app.mcp_server.tools.calculator import CalculatorTool
 
-from app.mcp_server.tools.calculator import calculate
 
-mcp = FastMCP(
-    SERVER_NAME,
-)
+mcp = FastMCP(SERVER_NAME)
+
+calculator_tool = CalculatorTool()
 
 
 @mcp.tool()
@@ -17,9 +17,11 @@ def calculator(
     Calculate a mathematical expression.
     """
 
-    return calculate(
+    result = calculator_tool.calculate(
         expression
     )
+
+    return str(result)
 
 
 def main():
